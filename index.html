@@ -20,6 +20,9 @@
         <div class="main-area">
             <div class="game-header">
                 <h1>KASTUS TETRIS</h1>
+                <button class="sound-btn" id="soundBtn" title="Toggle Music">
+                    🔊
+                </button>
             </div>
             <canvas id="gameCanvas" width="300" height="600"></canvas>
             <div class="game-over-overlay" id="gameOverOverlay">
@@ -57,7 +60,7 @@
         <p><span class="key">←→</span> Move <span class="key">↑</span> Rotate <span class="key">↓</span> Soft Drop <span
                 class="key">Space</span> Hard Drop <span class="key">C</span> Hold <span class="key">P</span> Pause</p>
     </div>
-    
+
     <!-- Mobile Controls -->
     <div class="mobile-controls" id="mobileControls">
         <div class="controls-row top-row">
@@ -86,7 +89,8 @@
             </button>
         </div>
     </div>
-    
+
+    <script src="audio.js"></script>
     <script src="game.js"></script>
 </body>
 

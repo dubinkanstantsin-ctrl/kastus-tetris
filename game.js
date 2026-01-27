@@ -212,11 +212,15 @@ function clearLines() {
         score += points[linesCleared] * level;
         lines += linesCleared;
 
+        // Play line clear sound
+        tetrisAudio.playLineClearSound();
+
         // Level up every 10 lines
         const newLevel = Math.floor(lines / 10) + 1;
         if (newLevel > level) {
             level = newLevel;
             dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+            tetrisAudio.playLevelUpSound();
         }
 
         updateStats();
@@ -479,6 +483,8 @@ function gameLoop(timestamp) {
 function showGameOver() {
     document.getElementById('finalScore').textContent = score;
     document.getElementById('gameOverOverlay').classList.add('show');
+    tetrisAudio.stopMusic();
+    tetrisAudio.playGameOverSound();
 }
 
 // Hide game over screen
@@ -509,12 +515,25 @@ function resetGame() {
         cancelAnimationFrame(animationId);
     }
     animationId = requestAnimationFrame(gameLoop);
+
+    // Start music
+    tetrisAudio.startMusic();
 }
 
 // Toggle pause
 function togglePause() {
     if (gameOver) return;
     isPaused = !isPaused;
+}
+
+// Toggle sound
+function toggleSound() {
+    const soundBtn = document.getElementById('soundBtn');
+    const isMuted = tetrisAudio.toggleMute();
+    if (soundBtn) {
+        soundBtn.textContent = isMuted ? '🔇' : '🔊';
+        soundBtn.classList.toggle('muted', isMuted);
+    }
 }
 
 // Keyboard controls
@@ -535,28 +554,34 @@ document.addEventListener('keydown', (e) => {
 
     switch (e.key) {
         case 'ArrowLeft':
-            movePiece(-1, 0);
+            if (movePiece(-1, 0)) tetrisAudio.playMoveSound();
             break;
         case 'ArrowRight':
-            movePiece(1, 0);
+            if (movePiece(1, 0)) tetrisAudio.playMoveSound();
             break;
         case 'ArrowDown':
             softDrop();
+            tetrisAudio.playMoveSound();
             break;
         case 'ArrowUp':
-            currentPiece.rotate(1);
+            if (currentPiece.rotate(1)) tetrisAudio.playRotateSound();
             break;
         case 'z':
         case 'Z':
-            currentPiece.rotate(-1);
+            if (currentPiece.rotate(-1)) tetrisAudio.playRotateSound();
             break;
         case ' ':
             e.preventDefault();
             hardDrop();
+            tetrisAudio.playDropSound();
             break;
         case 'c':
         case 'C':
             hold();
+            break;
+        case 'm':
+        case 'M':
+            toggleSound();
             break;
     }
 });
@@ -652,6 +677,12 @@ if (mobileControls) {
             }
         }
     }
+}
+
+// Sound button
+const soundBtn = document.getElementById('soundBtn');
+if (soundBtn) {
+    soundBtn.addEventListener('click', toggleSound);
 }
 
 // Start the game
