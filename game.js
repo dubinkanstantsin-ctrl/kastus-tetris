@@ -50,6 +50,12 @@ let dropInterval = 1000;
 let lastDrop = 0;
 let animationId = null;
 
+// Animation state
+let trails = []; // Trail effect for falling pieces
+let particles = []; // Particles for line clear
+let lineClearAnimations = []; // Lines being cleared
+let screenShake = 0; // Screen shake intensity
+
 // Wall kick data for SRS (Super Rotation System)
 const WALL_KICKS = {
     normal: [
@@ -193,20 +199,60 @@ function lockPiece() {
     spawnPiece();
 }
 
-// Clear completed lines
+// Clear completed lines with animation
 function clearLines() {
     let linesCleared = 0;
+    let clearedRows = [];
 
+    // Find all completed lines
     for (let row = ROWS - 1; row >= 0; row--) {
         if (board[row].every(cell => cell !== null)) {
-            board.splice(row, 1);
-            board.unshift(new Array(COLS).fill(null));
+            clearedRows.push(row);
             linesCleared++;
-            row++; // Check same row again
         }
     }
 
     if (linesCleared > 0) {
+        // Create explosion particles for each cleared line
+        clearedRows.forEach(row => {
+            for (let col = 0; col < COLS; col++) {
+                const color = board[row][col];
+                if (color) {
+                    // Create multiple particles per block
+                    for (let p = 0; p < 6; p++) {
+                        particles.push({
+                            x: (col + 0.5) * BLOCK_SIZE,
+                            y: (row + 0.5) * BLOCK_SIZE,
+                            vx: (Math.random() - 0.5) * 12,
+                            vy: (Math.random() - 0.5) * 12 - 3,
+                            color: color.main,
+                            size: Math.random() * 8 + 4,
+                            life: 1,
+                            decay: 0.02 + Math.random() * 0.02
+                        });
+                    }
+                }
+            }
+
+            // Add line flash animation
+            lineClearAnimations.push({
+                row: row,
+                progress: 0,
+                speed: 0.08
+            });
+        });
+
+        // Screen shake based on lines cleared
+        screenShake = linesCleared * 4;
+
+        // Remove cleared lines after a brief delay for visual effect
+        setTimeout(() => {
+            clearedRows.sort((a, b) => b - a).forEach(row => {
+                board.splice(row, 1);
+                board.unshift(new Array(COLS).fill(null));
+            });
+        }, 150);
+
         // Scoring: 100, 300, 500, 800 for 1, 2, 3, 4 lines
         const points = [0, 100, 300, 500, 800];
         score += points[linesCleared] * level;
@@ -292,9 +338,19 @@ function drawBlock(ctx, x, y, color, size, isGhost = false) {
 
 // Draw game board
 function drawBoard() {
+    // Apply screen shake
+    ctx.save();
+    if (screenShake > 0) {
+        const shakeX = (Math.random() - 0.5) * screenShake;
+        const shakeY = (Math.random() - 0.5) * screenShake;
+        ctx.translate(shakeX, shakeY);
+        screenShake *= 0.9;
+        if (screenShake < 0.5) screenShake = 0;
+    }
+
     // Clear canvas
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(-10, -10, canvas.width + 20, canvas.height + 20);
 
     // Draw grid lines
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
@@ -312,14 +368,55 @@ function drawBoard() {
         ctx.stroke();
     }
 
+    // Draw trails (behind locked pieces)
+    trails = trails.filter(trail => {
+        trail.opacity -= trail.decay;
+        if (trail.opacity <= 0) return false;
+
+        ctx.globalAlpha = trail.opacity;
+        ctx.fillStyle = trail.color.main;
+        ctx.shadowColor = trail.color.main;
+        ctx.shadowBlur = 10;
+        ctx.fillRect(trail.x + 2, trail.y + 2, BLOCK_SIZE - 4, BLOCK_SIZE - 4);
+        ctx.shadowBlur = 0;
+        return true;
+    });
+    ctx.globalAlpha = 1;
+
     // Draw locked pieces
     for (let row = 0; row < ROWS; row++) {
         for (let col = 0; col < COLS; col++) {
             if (board[row][col]) {
+                // Check if this row is being cleared
+                const clearing = lineClearAnimations.find(anim => anim.row === row);
+                if (clearing) {
+                    ctx.globalAlpha = 1 - clearing.progress;
+                    ctx.save();
+                    ctx.translate(col * BLOCK_SIZE + BLOCK_SIZE / 2, row * BLOCK_SIZE + BLOCK_SIZE / 2);
+                    ctx.scale(1 + clearing.progress * 0.3, 1 - clearing.progress);
+                    ctx.translate(-col * BLOCK_SIZE - BLOCK_SIZE / 2, -row * BLOCK_SIZE - BLOCK_SIZE / 2);
+                }
                 drawBlock(ctx, col * BLOCK_SIZE, row * BLOCK_SIZE, board[row][col], BLOCK_SIZE);
+                if (clearing) {
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+                }
             }
         }
     }
+
+    // Update line clear animations
+    lineClearAnimations = lineClearAnimations.filter(anim => {
+        anim.progress += anim.speed;
+        return anim.progress < 1;
+    });
+
+    // Draw line flash effects
+    lineClearAnimations.forEach(anim => {
+        const flashOpacity = Math.sin(anim.progress * Math.PI) * 0.8;
+        ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
+        ctx.fillRect(0, anim.row * BLOCK_SIZE, canvas.width, BLOCK_SIZE);
+    });
 
     // Draw ghost piece
     if (currentPiece && !gameOver) {
@@ -356,6 +453,33 @@ function drawBoard() {
             }
         }
     }
+
+    // Draw particles (on top of everything)
+    particles = particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3; // Gravity
+        p.life -= p.decay;
+        p.size *= 0.98;
+
+        if (p.life <= 0 || p.size < 1) return false;
+
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
+
+        // Draw a glowing particle
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        return true;
+    });
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
 }
 
 // Draw next pieces preview
@@ -435,6 +559,10 @@ function hold() {
 // Move piece
 function movePiece(dx, dy) {
     if (!collision(currentPiece.x + dx, currentPiece.y + dy, currentPiece.shape)) {
+        // Create trail when moving down
+        if (dy > 0 && currentPiece) {
+            addTrail(currentPiece, 0.3);
+        }
         currentPiece.x += dx;
         currentPiece.y += dy;
         return true;
@@ -442,11 +570,38 @@ function movePiece(dx, dy) {
     return false;
 }
 
-// Hard drop
+// Add trail effect at current piece position
+function addTrail(piece, opacity) {
+    for (let row = 0; row < piece.shape.length; row++) {
+        for (let col = 0; col < piece.shape[row].length; col++) {
+            if (piece.shape[row][col]) {
+                trails.push({
+                    x: (piece.x + col) * BLOCK_SIZE,
+                    y: (piece.y + row) * BLOCK_SIZE,
+                    color: piece.color,
+                    opacity: opacity,
+                    decay: 0.06
+                });
+            }
+        }
+    }
+}
+
+// Hard drop with intense trail
 function hardDrop() {
+    const startY = currentPiece.y;
     while (movePiece(0, 1)) {
         score += 2;
+        // Add brighter trails during hard drop
+        addTrail(currentPiece, 0.6);
     }
+
+    // Screen shake on landing
+    const dropDistance = currentPiece.y - startY;
+    if (dropDistance > 3) {
+        screenShake = Math.min(dropDistance, 8);
+    }
+
     lockPiece();
     updateStats();
 }
@@ -505,6 +660,12 @@ function resetGame() {
     isPaused = false;
     dropInterval = 1000;
     lastDrop = 0;
+
+    // Reset animations
+    trails = [];
+    particles = [];
+    lineClearAnimations = [];
+    screenShake = 0;
 
     updateStats();
     hideGameOver();
