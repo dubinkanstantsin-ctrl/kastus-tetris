@@ -14,6 +14,8 @@ A modern, beautiful implementation of the classic Tetris game.
 
 ## How to Play
 
+### Desktop Controls
+
 - **←→** - Move piece left/right
 - **↑** - Rotate clockwise
 - **Z** - Rotate counter-clockwise
@@ -21,6 +23,24 @@ A modern, beautiful implementation of the classic Tetris game.
 - **Space** - Hard drop (earn 2 points per cell)
 - **C** - Hold current piece
 - **P** - Pause game
+
+### Mobile Controls
+
+When playing on a mobile device, you'll see touch-friendly buttons:
+
+- **←→↓** - Direction buttons for movement
+- **↻** - Rotate button
+- **DROP** - Hard drop button
+- **HOLD** - Hold piece button
+- **⏸** - Pause button
+
+**Swipe Gestures** (on game board):
+- Swipe left/right - Move piece
+- Swipe down - Soft drop
+- Swipe up - Rotate piece
+
+**Haptic Feedback**: Feel subtle vibrations when tapping buttons (on supported devices)
+
 
 ## Play Online
 

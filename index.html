@@ -57,7 +57,36 @@
         <p><span class="key">←→</span> Move <span class="key">↑</span> Rotate <span class="key">↓</span> Soft Drop <span
                 class="key">Space</span> Hard Drop <span class="key">C</span> Hold <span class="key">P</span> Pause</p>
     </div>
-
+    
+    <!-- Mobile Controls -->
+    <div class="mobile-controls" id="mobileControls">
+        <div class="controls-row top-row">
+            <button class="control-btn" id="holdBtn" data-action="hold">
+                <span>HOLD</span>
+            </button>
+            <button class="control-btn" id="rotateBtn" data-action="rotate">
+                <span>↻</span>
+            </button>
+            <button class="control-btn" id="pauseBtn" data-action="pause">
+                <span>⏸</span>
+            </button>
+        </div>
+        <div class="controls-row bottom-row">
+            <button class="control-btn arrow-btn" id="leftBtn" data-action="left">
+                <span>←</span>
+            </button>
+            <button class="control-btn arrow-btn" id="downBtn" data-action="down">
+                <span>↓</span>
+            </button>
+            <button class="control-btn arrow-btn" id="rightBtn" data-action="right">
+                <span>→</span>
+            </button>
+            <button class="control-btn drop-btn" id="dropBtn" data-action="drop">
+                <span>DROP</span>
+            </button>
+        </div>
+    </div>
+    
     <script src="game.js"></script>
 </body>
 

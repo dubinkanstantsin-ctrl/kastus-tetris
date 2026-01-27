@@ -564,5 +564,95 @@ document.addEventListener('keydown', (e) => {
 // Restart button
 document.getElementById('restartBtn').addEventListener('click', resetGame);
 
+// Mobile Controls
+const mobileControls = document.getElementById('mobileControls');
+if (mobileControls) {
+    // Button actions
+    const actions = {
+        left: () => !gameOver && !isPaused && movePiece(-1, 0),
+        right: () => !gameOver && !isPaused && movePiece(1, 0),
+        down: () => !gameOver && !isPaused && softDrop(),
+        rotate: () => !gameOver && !isPaused && currentPiece && currentPiece.rotate(1),
+        drop: () => !gameOver && !isPaused && hardDrop(),
+        hold: () => !gameOver && !isPaused && hold(),
+        pause: () => togglePause()
+    };
+
+    // Add touch event listeners with haptic feedback
+    Object.keys(actions).forEach(action => {
+        const btn = document.getElementById(`${action}Btn`);
+        if (btn) {
+            // Prevent default touch behavior
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                actions[action]();
+                // Visual feedback
+                btn.style.transform = 'scale(0.95)';
+                // Vibrate if supported (10ms)
+                if (navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                btn.style.transform = '';
+            }, { passive: false });
+
+            // Also support click for testing
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                actions[action]();
+            });
+        }
+    });
+
+    // Swipe gestures on canvas for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    canvas.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', (e) => {
+        if (gameOver || isPaused) return;
+
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        const minSwipeDistance = 30;
+
+        // Horizontal swipe
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                    movePiece(1, 0); // Swipe right
+                } else {
+                    movePiece(-1, 0); // Swipe left
+                }
+            }
+        }
+        // Vertical swipe
+        else {
+            if (Math.abs(deltaY) > minSwipeDistance) {
+                if (deltaY > 0) {
+                    softDrop(); // Swipe down
+                } else {
+                    currentPiece.rotate(1); // Swipe up to rotate
+                }
+            }
+        }
+    }
+}
+
 // Start the game
 resetGame();
