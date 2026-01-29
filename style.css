@@ -467,19 +467,128 @@ body::before {
     }
 }
 
-/* Responsive */
+/* Mobile responsive - compact layout */
 @media (max-width: 700px) {
+    body {
+        min-height: 100vh;
+        padding: 5px;
+    }
+
     .game-container {
         flex-direction: column;
         align-items: center;
+        gap: 5px;
+    }
+
+    /* Hide vibe coder on mobile */
+    .vibe-coder {
+        display: none !important;
+    }
+
+    /* Compact sound button - icon only */
+    .sound-btn {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+        border-radius: 50%;
+        font-size: 16px;
+    }
+
+    .sound-btn::after {
+        display: none;
     }
 
     .side-panel {
         flex-direction: row;
+        gap: 8px;
+    }
+
+    .side-panel.left {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+    }
+
+    .side-panel.right {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 5px;
+    }
+
+    .next-box {
+        padding: 8px;
+    }
+
+    .next-box h3 {
+        font-size: 10px;
+        margin-bottom: 5px;
+    }
+
+    #nextCanvas {
+        width: 60px !important;
+        height: 120px !important;
+    }
+
+    .stats-panel {
+        padding: 8px 12px;
+        flex-direction: row;
+        gap: 15px;
+    }
+
+    .stat-item {
+        flex-direction: row;
+        gap: 5px;
+    }
+
+    .stat-item .label {
+        font-size: 9px;
+    }
+
+    .stat-item .value {
+        font-size: 16px;
     }
 
     .game-header h1 {
-        font-size: 32px;
-        letter-spacing: 8px;
+        font-size: 24px;
+        letter-spacing: 4px;
+        margin-bottom: 5px;
+    }
+
+    #gameCanvas {
+        width: 240px !important;
+        height: 480px !important;
+    }
+
+    /* Compact mobile controls */
+    .mobile-controls {
+        padding: 8px;
+        gap: 8px;
+        margin-top: 5px;
+    }
+
+    .controls-row {
+        gap: 8px;
+    }
+
+    .control-btn {
+        padding: 12px;
+        min-width: 55px;
+        min-height: 55px;
+        font-size: 20px;
+        border-radius: 10px;
+    }
+
+    .arrow-btn {
+        min-width: 60px;
+        min-height: 60px;
+        font-size: 26px;
+    }
+
+    .drop-btn {
+        min-width: 70px;
+        font-size: 11px;
     }
 }
