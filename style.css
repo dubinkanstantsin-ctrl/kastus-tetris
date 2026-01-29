@@ -475,9 +475,12 @@ body::before {
     }
 
     .game-container {
-        flex-direction: column;
-        align-items: center;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto auto;
         gap: 5px;
+        align-items: start;
+        justify-items: center;
     }
 
     /* Hide vibe coder on mobile */
@@ -485,13 +488,17 @@ body::before {
         display: none !important;
     }
 
-    /* Compact sound button - icon only */
+    /* Compact sound button - icon only, fixed */
     .sound-btn {
-        width: 40px;
-        height: 40px;
-        padding: 8px;
+        width: 36px;
+        height: 36px;
+        padding: 6px;
         border-radius: 50%;
-        font-size: 16px;
+        font-size: 14px;
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        z-index: 200;
     }
 
     .sound-btn::after {
@@ -499,23 +506,26 @@ body::before {
     }
 
     .side-panel {
-        flex-direction: row;
-        gap: 8px;
+        flex-direction: column;
+        gap: 5px;
     }
 
     .side-panel.left {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 100;
+        grid-column: 1;
+        grid-row: 1;
+        align-items: flex-end;
+        padding-top: 40px;
     }
 
     .side-panel.right {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin-bottom: 5px;
+        grid-column: 3;
+        grid-row: 1;
+        align-items: flex-start;
+    }
+
+    .main-area {
+        grid-column: 2;
+        grid-row: 1;
     }
 
     .next-box {
@@ -562,11 +572,14 @@ body::before {
         height: 480px !important;
     }
 
-    /* Compact mobile controls */
+    /* Compact mobile controls - below game */
     .mobile-controls {
-        padding: 8px;
-        gap: 8px;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        padding: 5px;
+        gap: 5px;
         margin-top: 5px;
+        width: 100%;
     }
 
     .controls-row {
