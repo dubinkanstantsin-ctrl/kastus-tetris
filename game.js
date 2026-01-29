@@ -3,15 +3,12 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('nextCanvas');
 const nextCtx = nextCanvas.getContext('2d');
-const holdCanvas = document.getElementById('holdCanvas');
-const holdCtx = holdCanvas.getContext('2d');
 
 // Game constants
 const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
 const NEXT_BLOCK_SIZE = 20;
-const HOLD_BLOCK_SIZE = 20;
 
 // Colors for each piece type with gradient info
 const COLORS = {
@@ -39,8 +36,6 @@ const SHAPES = {
 let board = [];
 let currentPiece = null;
 let nextPieces = [];
-let holdPiece = null;
-let canHold = true;
 let score = 0;
 let level = 1;
 let lines = 0;
@@ -510,51 +505,7 @@ function drawNextPieces() {
     }
 }
 
-// Draw hold piece
-function drawHoldPiece() {
-    holdCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    holdCtx.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
 
-    if (holdPiece) {
-        const offsetX = (holdCanvas.width - holdPiece.shape[0].length * HOLD_BLOCK_SIZE) / 2;
-        const offsetY = (holdCanvas.height - holdPiece.shape.length * HOLD_BLOCK_SIZE) / 2;
-
-        for (let row = 0; row < holdPiece.shape.length; row++) {
-            for (let col = 0; col < holdPiece.shape[row].length; col++) {
-                if (holdPiece.shape[row][col]) {
-                    const color = canHold ? holdPiece.color : {
-                        main: '#666',
-                        light: '#888',
-                        dark: '#444'
-                    };
-                    drawBlock(
-                        holdCtx,
-                        offsetX + col * HOLD_BLOCK_SIZE,
-                        offsetY + row * HOLD_BLOCK_SIZE,
-                        color,
-                        HOLD_BLOCK_SIZE
-                    );
-                }
-            }
-        }
-    }
-}
-
-// Hold current piece
-function hold() {
-    if (!canHold) return;
-
-    canHold = false;
-
-    if (holdPiece) {
-        const temp = holdPiece;
-        holdPiece = new Piece(currentPiece.type);
-        currentPiece = new Piece(temp.type);
-    } else {
-        holdPiece = new Piece(currentPiece.type);
-        spawnPiece();
-    }
-}
 
 // Move piece
 function movePiece(dx, dy) {
@@ -628,7 +579,6 @@ function gameLoop(timestamp) {
 
         drawBoard();
         drawNextPieces();
-        drawHoldPiece();
     }
 
     animationId = requestAnimationFrame(gameLoop);
@@ -651,8 +601,6 @@ function hideGameOver() {
 function resetGame() {
     initBoard();
     nextPieces = [];
-    holdPiece = null;
-    canHold = true;
     score = 0;
     level = 1;
     lines = 0;
@@ -736,10 +684,7 @@ document.addEventListener('keydown', (e) => {
             hardDrop();
             tetrisAudio.playDropSound();
             break;
-        case 'c':
-        case 'C':
-            hold();
-            break;
+
         case 'm':
         case 'M':
             toggleSound();
@@ -760,7 +705,6 @@ if (mobileControls) {
         down: () => !gameOver && !isPaused && softDrop(),
         rotate: () => !gameOver && !isPaused && currentPiece && currentPiece.rotate(1),
         drop: () => !gameOver && !isPaused && hardDrop(),
-        hold: () => !gameOver && !isPaused && hold(),
         pause: () => togglePause()
     };
 

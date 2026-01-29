@@ -11,10 +11,6 @@
 <body>
     <div class="game-container">
         <div class="side-panel left">
-            <div class="hold-box">
-                <h3>HOLD</h3>
-                <canvas id="holdCanvas" width="100" height="100"></canvas>
-            </div>
             <button class="sound-btn" id="soundBtn" title="Toggle Sound">
                 🔊
             </button>
@@ -62,15 +58,12 @@
 
     <div class="controls-info">
         <p><span class="key">←→</span> Move <span class="key">↑</span> Rotate <span class="key">↓</span> Soft Drop <span
-                class="key">Space</span> Hard Drop <span class="key">C</span> Hold <span class="key">P</span> Pause</p>
+                class="key">Space</span> Hard Drop <span class="key">P</span> Pause</p>
     </div>
 
     <!-- Mobile Controls -->
     <div class="mobile-controls" id="mobileControls">
         <div class="controls-row top-row">
-            <button class="control-btn" id="holdBtn" data-action="hold">
-                <span>HOLD</span>
-            </button>
             <button class="control-btn" id="rotateBtn" data-action="rotate">
                 <span>↻</span>
             </button>
