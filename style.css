@@ -545,18 +545,20 @@ body::before {
     }
 
     .stats-panel {
-        padding: 8px 12px;
-        flex-direction: row;
-        gap: 15px;
+        padding: 6px 8px;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .stat-item {
-        flex-direction: row;
-        gap: 5px;
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+        text-align: center;
     }
 
     .stat-item .label {
-        font-size: 9px;
+        font-size: 8px;
     }
 
     .stat-item .value {
